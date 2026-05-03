@@ -163,16 +163,17 @@ export interface User {
   collection: 'users';
 }
 /**
+ * Files are stored on Cloudinary. Images are optimized (WebP, max width 1200px).
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: number;
   /**
-   * Required for images (used for accessibility).
+   * Required for images (accessibility).
    */
   alt?: string | null;
-  storagePath?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -223,7 +224,7 @@ export interface Product {
   heroImage?: (number | null) | Media;
   galleryImages?:
     | {
-        image: number | Media;
+        media: number | Media;
         id?: string | null;
       }[]
     | null;
@@ -286,7 +287,7 @@ export interface Client {
   /**
    * Images only.
    */
-  logo: number | Media;
+  logo?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -317,7 +318,10 @@ export interface Lead {
   company?: string | null;
   phone: string;
   email: string;
-  product?: string | null;
+  /**
+   * Optional product the lead is interested in.
+   */
+  product?: (number | null) | Product;
   message?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -449,7 +453,6 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
-  storagePath?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -487,7 +490,7 @@ export interface ProductsSelect<T extends boolean = true> {
   galleryImages?:
     | T
     | {
-        image?: T;
+        media?: T;
         id?: T;
       };
   pdf?: T;

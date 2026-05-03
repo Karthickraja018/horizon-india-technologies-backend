@@ -47,9 +47,10 @@ export const Products: CollectionConfig = {
             {
               name: 'galleryImages',
               type: 'array',
+              labels: { singular: 'Image', plural: 'Gallery images' },
               fields: [
                 {
-                  name: 'image',
+                  name: 'media',
                   type: 'relationship',
                   relationTo: 'media',
                   required: true,
@@ -104,9 +105,9 @@ export const Products: CollectionConfig = {
           if (data?.heroImage) await assertMediaIsImage(req, String(data.heroImage), 'Hero image')
           if (data?.pdf) await assertMediaIsPDF(req, String(data.pdf), 'Product PDF')
 
-          const gallery = (data?.galleryImages ?? []) as Array<{ image?: string }>
+          const gallery = (data?.galleryImages ?? []) as Array<{ media?: string }>
           for (const item of gallery) {
-            if (item?.image) await assertMediaIsImage(req, String(item.image), 'Gallery image')
+            if (item?.media) await assertMediaIsImage(req, String(item.media), 'Gallery image')
           }
         }
         return data

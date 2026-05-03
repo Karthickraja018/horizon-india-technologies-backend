@@ -1,58 +1,87 @@
-import type { CollectionConfig } from 'payload'
-import crypto from 'crypto'
+import type {
+  CollectionBeforeChangeHook,
+  CollectionBeforeValidateHook,
+  CollectionConfig,
+  PayloadRequest,
+} from 'payload'
 
-import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabase'
+import { uploadImageBufferToCloudinary, uploadPdfBufferToCloudinary } from '../lib/cloudinary'
 
-const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'media'
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024
+const MAX_PDF_BYTES = 25 * 1024 * 1024
 
-function sanitizeFilename(name: string): string {
-  return name
-    .trim()
-    .replace(/[^\w.\-()+ ]+/g, '')
-    .replace(/\s+/g, '-')
+const ALLOWED_IMAGE_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
+const ALLOWED_PDF_MIME = 'application/pdf'
+
+async function readUploadBuffer(file: NonNullable<PayloadRequest['file']>): Promise<Buffer> {
+  const extended = file as NonNullable<PayloadRequest['file']> & { data?: Buffer; buffer?: Buffer }
+  if (extended.data && Buffer.isBuffer(extended.data)) return extended.data
+  if (extended.buffer && Buffer.isBuffer(extended.buffer)) return extended.buffer
+  if (typeof file.arrayBuffer === 'function') {
+    const ab = await file.arrayBuffer()
+    return Buffer.from(ab)
+  }
+  throw new Error('Unable to read uploaded file.')
 }
 
-async function uploadToSupabase({
-  req,
-  data,
-  operation,
-}: {
-  req: any
-  data: any
-  operation: 'create' | 'update'
-}) {
-  // In dev / non-Supabase environments, let Payload handle local storage.
-  if (!isSupabaseConfigured()) return data
-  if ((operation !== 'create' && operation !== 'update') || !req?.file) return data
+const validateUploadFile: CollectionBeforeValidateHook = async ({ req, operation }) => {
+  const file = req.file
+  if (!file || operation === 'delete') return
 
-  const file = req.file as any
-  const fileData: Buffer | undefined = file?.data ?? file?.buffer
-  if (!fileData) throw new Error('Missing file buffer on req.file')
+  const mime = file.type || (file as { mimetype?: string }).mimetype || ''
+  const buffer = await readUploadBuffer(file).catch(() => null)
+  const size = buffer?.length ?? (Number((file as { size?: number }).size) || 0)
 
-  const originalName: string = file?.name || 'upload'
-  const uniquePrefix = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}`
-  const objectName = `${uniquePrefix}-${sanitizeFilename(originalName)}`
-
-  const supabase = getSupabaseClient()
-
-  const { error: uploadError } = await supabase.storage.from(BUCKET).upload(objectName, fileData, {
-    contentType: file?.mimetype || file?.mimeType,
-    upsert: false,
-  })
-
-  if (uploadError) {
-    throw new Error(`Supabase upload failed: ${uploadError.message}`)
+  if (ALLOWED_IMAGE_MIME.has(mime)) {
+    if (size > MAX_IMAGE_BYTES) {
+      throw new Error(`Images must be ${MAX_IMAGE_BYTES / (1024 * 1024)}MB or smaller before upload.`)
+    }
+    return
   }
 
-  const { data: publicData } = supabase.storage.from(BUCKET).getPublicUrl(objectName)
-  const publicUrl = publicData?.publicUrl
-  if (!publicUrl) throw new Error('Failed to generate public URL from Supabase Storage')
-
-  return {
-    ...data,
-    url: publicUrl,
-    storagePath: objectName,
+  if (mime === ALLOWED_PDF_MIME) {
+    if (size > MAX_PDF_BYTES) {
+      throw new Error(`PDFs must be ${MAX_PDF_BYTES / (1024 * 1024)}MB or smaller.`)
+    }
+    return
   }
+
+  throw new Error(`Unsupported file type "${mime}". Allowed: JPEG, PNG, WebP, PDF.`)
+}
+
+const uploadToCloudinary: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
+  const file = req.file
+  if (!file || (operation !== 'create' && operation !== 'update')) {
+    return data
+  }
+
+  const mime = file.type || (file as { mimetype?: string }).mimetype || ''
+  const originalName = file.name || 'upload'
+  const buffer = await readUploadBuffer(file)
+
+  if (ALLOWED_IMAGE_MIME.has(mime)) {
+    const { secure_url, bytes } = await uploadImageBufferToCloudinary(buffer, originalName)
+    return {
+      ...data,
+      filename: originalName,
+      mimeType: mime,
+      filesize: bytes,
+      url: secure_url,
+    }
+  }
+
+  if (mime === ALLOWED_PDF_MIME) {
+    const { secure_url, bytes } = await uploadPdfBufferToCloudinary(buffer, originalName)
+    return {
+      ...data,
+      filename: originalName,
+      mimeType: mime,
+      filesize: bytes,
+      url: secure_url,
+    }
+  }
+
+  throw new Error(`Unsupported file type "${mime}".`)
 }
 
 export const Media: CollectionConfig = {
@@ -61,38 +90,32 @@ export const Media: CollectionConfig = {
     read: () => true,
   },
   admin: {
+    group: 'Catalog',
     useAsTitle: 'filename',
     defaultColumns: ['filename', 'mimeType', 'filesize', 'updatedAt'],
+    description: 'Files are stored on Cloudinary. Images are optimized (WebP, max width 1200px).',
+  },
+  hooks: {
+    beforeValidate: [validateUploadFile],
+    beforeChange: [uploadToCloudinary],
+  },
+  upload: {
+    disableLocalStorage: true,
+    mimeTypes: [...ALLOWED_IMAGE_MIME, ALLOWED_PDF_MIME],
+    maxFileSize: MAX_PDF_BYTES,
   },
   fields: [
     {
       name: 'alt',
       type: 'text',
       validate: (val, { data }) => {
-        const mimeType = (data as any)?.mimeType as string | undefined
+        const mimeType = (data as { mimeType?: string })?.mimeType
         if (mimeType?.startsWith('image/') && !val) return 'Alt text is required for images.'
         return true
       },
       admin: {
-        description: 'Required for images (used for accessibility).',
-      },
-    },
-    {
-      name: 'storagePath',
-      type: 'text',
-      admin: {
-        hidden: true,
+        description: 'Required for images (accessibility).',
       },
     },
   ],
-  hooks: {
-    beforeChange: [
-      async (args) => uploadToSupabase(args as any),
-    ],
-  },
-  upload: {
-    disableLocalStorage: isSupabaseConfigured(),
-    mimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
-    maxFileSize: 25_000_000,
-  },
 }

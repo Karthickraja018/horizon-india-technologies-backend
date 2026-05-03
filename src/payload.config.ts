@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
@@ -18,6 +20,17 @@ import { SiteSettings } from './globals/SiteSettings'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+const databaseUrl = process.env.DATABASE_URL
+const payloadSecret = process.env.PAYLOAD_SECRET
+
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL is required (Supabase Postgres connection string). No fallback database is configured.')
+}
+
+if (!payloadSecret) {
+  throw new Error('PAYLOAD_SECRET is required.')
+}
+
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -28,14 +41,14 @@ export default buildConfig({
   collections: [Users, Media, Categories, Products, Services, Clients, Resources, Leads],
   globals: [SiteSettings],
   editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET || '',
+  secret: payloadSecret,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URL || '',
-      ssl: process.env.DATABASE_URL?.includes('supabase.co') ? { rejectUnauthorized: false } : undefined,
+      connectionString: databaseUrl,
+      ssl: databaseUrl.includes('supabase.co') ? { rejectUnauthorized: false } : undefined,
       max: Number(process.env.PG_POOL_MAX || 10),
       idleTimeoutMillis: Number(process.env.PG_IDLE_TIMEOUT_MS || 30_000),
       connectionTimeoutMillis: Number(process.env.PG_CONN_TIMEOUT_MS || 10_000),
@@ -75,21 +88,5 @@ export default buildConfig({
       }
     }
 
-    const serviceTitles = ['AMC', 'Calibration', 'Upgradation', 'Spare Parts', 'Training']
-    for (const title of serviceTitles) {
-      const existing = await payload.find({
-        collection: 'services',
-        where: { title: { equals: title } },
-        limit: 1,
-        depth: 0,
-      })
-
-      if (!existing?.docs?.length) {
-        await payload.create({
-          collection: 'services',
-          data: { title },
-        })
-      }
-    }
   },
 })

@@ -5,7 +5,7 @@ export const Services: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'updatedAt'],
-    group: 'Company',
+    group: 'Content',
   },
   fields: [
     {

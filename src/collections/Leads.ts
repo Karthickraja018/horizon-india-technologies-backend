@@ -20,7 +20,14 @@ export const Leads: CollectionConfig = {
     { name: 'company', type: 'text' },
     { name: 'phone', type: 'text', required: true },
     { name: 'email', type: 'email', required: true },
-    { name: 'product', type: 'text' },
+    {
+      name: 'product',
+      type: 'relationship',
+      relationTo: 'products',
+      admin: {
+        description: 'Optional product the lead is interested in.',
+      },
+    },
     { name: 'message', type: 'textarea' },
   ],
 }

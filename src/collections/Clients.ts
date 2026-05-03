@@ -7,7 +7,7 @@ export const Clients: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'sector', 'updatedAt'],
-    group: 'Company',
+    group: 'Content',
   },
   fields: [
     { name: 'name', type: 'text', required: true },
@@ -16,7 +16,6 @@ export const Clients: CollectionConfig = {
       name: 'logo',
       type: 'relationship',
       relationTo: 'media',
-      required: true,
       admin: { description: 'Images only.' },
       filterOptions: { mimeType: { contains: 'image/' } },
     },
