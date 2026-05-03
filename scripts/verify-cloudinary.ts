@@ -17,7 +17,7 @@ const tinyPng = Buffer.from(
 )
 
 async function main(): Promise<void> {
-  const { configureCloudinaryFromEnv, uploadImageBufferToCloudinary } = await import('../src/lib/cloudinary.ts')
+  const { configureCloudinaryFromEnv, uploadImageBufferToCloudinary } = await import('../src/lib/cloudinary')
 
   configureCloudinaryFromEnv()
   const { secure_url } = await uploadImageBufferToCloudinary(tinyPng, 'payload-env-verify.png')
