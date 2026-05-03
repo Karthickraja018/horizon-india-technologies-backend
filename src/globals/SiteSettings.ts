@@ -5,6 +5,9 @@ import { adminsOnly } from '../lib/access'
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
   label: 'Site Settings',
+  admin: {
+    group: 'Settings',
+  },
   access: {
     read: () => true,
     update: adminsOnly,

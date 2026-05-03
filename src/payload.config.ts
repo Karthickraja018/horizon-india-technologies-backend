@@ -37,8 +37,11 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      beforeDashboard: ['@/components/admin/DashboardHub#DashboardHub'],
+    },
   },
-  collections: [Users, Media, Categories, Products, Services, Clients, Resources, Leads],
+  collections: [Users, Leads, Categories, Products, Media, Services, Clients, Resources],
   globals: [SiteSettings],
   editor: lexicalEditor(),
   secret: payloadSecret,

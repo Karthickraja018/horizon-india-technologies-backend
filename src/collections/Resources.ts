@@ -8,6 +8,7 @@ export const Resources: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'fileType', 'fileSize', 'updatedAt'],
     group: 'Content',
+    description: 'Downloadable PDF resources linked to categories.',
   },
   fields: [
     { name: 'title', type: 'text', required: true },

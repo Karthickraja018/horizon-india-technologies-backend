@@ -8,6 +8,7 @@ export const Clients: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'sector', 'updatedAt'],
     group: 'Content',
+    description: 'Client logos and names for trust sections.',
   },
   fields: [
     { name: 'name', type: 'text', required: true },

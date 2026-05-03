@@ -6,6 +6,7 @@ export const Services: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'updatedAt'],
     group: 'Content',
+    description: 'Services shown on your marketing pages.',
   },
   fields: [
     {

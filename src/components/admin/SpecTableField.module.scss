@@ -1,0 +1,90 @@
+.root {
+  width: 100%;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.th,
+.thAction {
+  text-align: left;
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--theme-elevation-150);
+  font-weight: 600;
+}
+
+.thAction {
+  width: 5rem;
+}
+
+.td,
+.tdAction {
+  padding: 0.35rem 0.5rem;
+  vertical-align: middle;
+}
+
+.tdAction {
+  width: 5rem;
+}
+
+.input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--theme-elevation-150);
+  background: var(--theme-input-bg);
+  color: var(--theme-text);
+}
+
+.empty {
+  padding: 0.75rem 0.5rem;
+  color: var(--theme-elevation-600);
+}
+
+.addBtn {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .table,
+  .table thead,
+  .table tbody,
+  .table th,
+  .table td,
+  .table tr {
+    display: block;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tr {
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--theme-elevation-150);
+    border-radius: 6px;
+    padding: 0.35rem;
+  }
+
+  .td,
+  .tdAction {
+    padding: 0.25rem;
+  }
+
+  .td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    color: var(--theme-elevation-600);
+  }
+}

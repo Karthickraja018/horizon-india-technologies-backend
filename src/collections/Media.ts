@@ -46,7 +46,7 @@ const validateUploadFile: CollectionBeforeValidateHook = async ({ req, operation
     return
   }
 
-  throw new Error(`Unsupported file type "${mime}". Allowed: JPEG, PNG, WebP, PDF.`)
+  throw new Error('Please upload a valid image (JPG, PNG, WebP) or PDF.')
 }
 
 const uploadToCloudinary: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
@@ -81,7 +81,7 @@ const uploadToCloudinary: CollectionBeforeChangeHook = async ({ data, req, opera
     }
   }
 
-  throw new Error(`Unsupported file type "${mime}".`)
+  throw new Error('Please upload a valid image (JPG, PNG, WebP) or PDF.')
 }
 
 export const Media: CollectionConfig = {
@@ -89,11 +89,16 @@ export const Media: CollectionConfig = {
   access: {
     read: () => true,
   },
+  labels: {
+    singular: 'Media library file',
+    plural: 'Media library',
+  },
   admin: {
-    group: 'Catalog',
+    group: 'Content',
     useAsTitle: 'filename',
     defaultColumns: ['filename', 'mimeType', 'filesize', 'updatedAt'],
-    description: 'Files are stored on Cloudinary. Images are optimized (WebP, max width 1200px).',
+    description:
+      'Upload images (logos, product photos) and PDFs here. Files are stored on Cloudinary; images are optimized automatically.',
   },
   hooks: {
     beforeValidate: [validateUploadFile],

@@ -68,32 +68,34 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
-    media: Media;
+    leads: Lead;
     categories: Category;
     products: Product;
+    media: Media;
     services: Service;
     clients: Client;
     resources: Resource;
-    leads: Lead;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+    'payload-query-presets': PayloadQueryPreset;
   };
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
+    leads: LeadsSelect<false> | LeadsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
     resources: ResourcesSelect<false> | ResourcesSelect<true>;
-    leads: LeadsSelect<false> | LeadsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'payload-query-presets': PayloadQueryPresetsSelect<false> | PayloadQueryPresetsSelect<true>;
   };
   db: {
     defaultIDType: number;
@@ -163,7 +165,128 @@ export interface User {
   collection: 'users';
 }
 /**
- * Files are stored on Cloudinary. Images are optimized (WebP, max width 1200px).
+ * Contact form submissions — check here daily for new inquiries.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads".
+ */
+export interface Lead {
+  id: number;
+  /**
+   * Turn on after you have reviewed this lead.
+   */
+  viewed?: boolean | null;
+  name: string;
+  company?: string | null;
+  phone: string;
+  email: string;
+  /**
+   * Optional — product the visitor asked about.
+   */
+  product?: (number | null) | Product;
+  message?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Your B2B catalog items shown on the website. To copy an existing product quickly, open it and use the Duplicate action (⋯ menu).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: number;
+  /**
+   * The name visitors see on the product page and listings.
+   */
+  name: string;
+  /**
+   * Choose which section this product belongs to.
+   */
+  category: number | Category;
+  /**
+   * SKU or manufacturer model reference (optional but recommended).
+   */
+  modelCode?: string | null;
+  /**
+   * Generated from the product name. Used in links and APIs.
+   */
+  slug: string;
+  /**
+   * Shown at the top of the product page.
+   */
+  heroImage?: (number | null) | Media;
+  /**
+   * Additional photos. Drag rows to reorder when using the default gallery controls.
+   */
+  galleryImages?:
+    | {
+        /**
+         * Please upload a valid image file (JPG, PNG, WebP).
+         */
+        media: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  description?: string | null;
+  applications?: string | null;
+  /**
+   * Short bullet-style points visitors scan first. Example: “Automated test cycles”.
+   */
+  keyFeatures?:
+    | {
+        feature: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Specifications: add technical details like capacity, accuracy, dimensions.
+   */
+  specTable?:
+    | {
+        label: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  pdf?: (number | null) | Media;
+  /**
+   * Optional. Shown in browser tabs and search results.
+   */
+  metaTitle?: string | null;
+  /**
+   * Optional short summary for search snippets.
+   */
+  metaDescription?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Product groupings used on the website and catalog.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  /**
+   * Shown to visitors (e.g. Hardness testing).
+   */
+  name: string;
+  /**
+   * Generated from the category name. Used in links.
+   */
+  slug: string;
+  description?: string | null;
+  /**
+   * Please upload a valid image file (JPG, PNG, WebP).
+   */
+  heroImage?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Upload images (logos, product photos) and PDFs here. Files are stored on Cloudinary; images are optimized automatically.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
@@ -187,72 +310,8 @@ export interface Media {
   focalY?: number | null;
 }
 /**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: number;
-  name: string;
-  /**
-   * Used for URLs and filtering via the REST API.
-   */
-  slug: string;
-  description?: string | null;
-  /**
-   * Images only.
-   */
-  heroImage?: (number | null) | Media;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "products".
- */
-export interface Product {
-  id: number;
-  name: string;
-  /**
-   * Used for URLs and filtering via the REST API.
-   */
-  slug: string;
-  category?: (number | null) | Category;
-  modelCode?: string | null;
-  /**
-   * Images only.
-   */
-  heroImage?: (number | null) | Media;
-  galleryImages?:
-    | {
-        media: number | Media;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * PDF only (datasheet / brochure).
-   */
-  pdf?: (number | null) | Media;
-  description?: string | null;
-  keyFeatures?:
-    | {
-        feature: string;
-        id?: string | null;
-      }[]
-    | null;
-  specTable?:
-    | {
-        label: string;
-        value: string;
-        id?: string | null;
-      }[]
-    | null;
-  applications?: string | null;
-  metaTitle?: string | null;
-  metaDescription?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
+ * Services shown on your marketing pages.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "services".
  */
@@ -277,6 +336,8 @@ export interface Service {
   createdAt: string;
 }
 /**
+ * Client logos and names for trust sections.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "clients".
  */
@@ -292,6 +353,8 @@ export interface Client {
   createdAt: string;
 }
 /**
+ * Downloadable PDF resources linked to categories.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "resources".
  */
@@ -305,24 +368,6 @@ export interface Resource {
    * PDF only.
    */
   pdf: number | Media;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "leads".
- */
-export interface Lead {
-  id: number;
-  name: string;
-  company?: string | null;
-  phone: string;
-  email: string;
-  /**
-   * Optional product the lead is interested in.
-   */
-  product?: (number | null) | Product;
-  message?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -355,8 +400,8 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
-        relationTo: 'media';
-        value: number | Media;
+        relationTo: 'leads';
+        value: number | Lead;
       } | null)
     | ({
         relationTo: 'categories';
@@ -365,6 +410,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'products';
         value: number | Product;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'services';
@@ -377,10 +426,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'resources';
         value: number | Resource;
-      } | null)
-    | ({
-        relationTo: 'leads';
-        value: number | Lead;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -426,6 +471,55 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-query-presets".
+ */
+export interface PayloadQueryPreset {
+  id: number;
+  title: string;
+  isShared?: boolean | null;
+  access?: {
+    read?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: (number | User)[] | null;
+    };
+    update?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: (number | User)[] | null;
+    };
+    delete?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: (number | User)[] | null;
+    };
+  };
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  columns?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  groupBy?: string | null;
+  relatedCollection: 'leads';
+  /**
+   * This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
+   */
+  isTemp?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -449,21 +543,18 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
+ * via the `definition` "leads_select".
  */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
+export interface LeadsSelect<T extends boolean = true> {
+  viewed?: T;
+  name?: T;
+  company?: T;
+  phone?: T;
+  email?: T;
+  product?: T;
+  message?: T;
   updatedAt?: T;
   createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -483,9 +574,9 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface ProductsSelect<T extends boolean = true> {
   name?: T;
-  slug?: T;
   category?: T;
   modelCode?: T;
+  slug?: T;
   heroImage?: T;
   galleryImages?:
     | T
@@ -493,8 +584,8 @@ export interface ProductsSelect<T extends boolean = true> {
         media?: T;
         id?: T;
       };
-  pdf?: T;
   description?: T;
+  applications?: T;
   keyFeatures?:
     | T
     | {
@@ -508,11 +599,29 @@ export interface ProductsSelect<T extends boolean = true> {
         value?: T;
         id?: T;
       };
-  applications?: T;
+  pdf?: T;
   metaTitle?: T;
   metaDescription?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -562,20 +671,6 @@ export interface ResourcesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "leads_select".
- */
-export interface LeadsSelect<T extends boolean = true> {
-  name?: T;
-  company?: T;
-  phone?: T;
-  email?: T;
-  product?: T;
-  message?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -611,6 +706,43 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
 export interface PayloadMigrationsSelect<T extends boolean = true> {
   name?: T;
   batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-query-presets_select".
+ */
+export interface PayloadQueryPresetsSelect<T extends boolean = true> {
+  title?: T;
+  isShared?: T;
+  access?:
+    | T
+    | {
+        read?:
+          | T
+          | {
+              constraint?: T;
+              users?: T;
+            };
+        update?:
+          | T
+          | {
+              constraint?: T;
+              users?: T;
+            };
+        delete?:
+          | T
+          | {
+              constraint?: T;
+              users?: T;
+            };
+      };
+  where?: T;
+  columns?: T;
+  groupBy?: T;
+  relatedCollection?: T;
+  isTemp?: T;
   updatedAt?: T;
   createdAt?: T;
 }
