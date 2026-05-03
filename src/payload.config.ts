@@ -31,6 +31,22 @@ if (!payloadSecret) {
   throw new Error('PAYLOAD_SECRET is required.')
 }
 
+/** Supabase direct host is often IPv6-only; Vercel resolves it as ENOTFOUND — use Transaction pooler URI instead. */
+function warnIfSupabaseDirectDbHost(connectionString: string): void {
+  try {
+    const hostname = new URL(connectionString.replace(/^postgresql:/i, 'postgres:')).hostname
+    if (!/^db\.[a-z0-9]+\.supabase\.co$/i.test(hostname)) return
+
+    console.warn(
+      '[payload] DATABASE_URL uses Supabase direct host (db.<ref>.supabase.co). On Vercel/serverless this commonly fails with getaddrinfo ENOTFOUND because that hostname may only advertise IPv6. Replace DATABASE_URL with the Transaction pooler string from Supabase → Project Settings → Database → Connection string → Transaction pool (host aws-0-<region>.pooler.supabase.com, port 6543).',
+    )
+  } catch {
+    // ignore malformed URI
+  }
+}
+
+warnIfSupabaseDirectDbHost(databaseUrl)
+
 /**
  * Serverless + managed Postgres often requires TLS; some providers use chains that break
  * strict verification unless `rejectUnauthorized` is false (Supabase pooler, Neon, etc.).
