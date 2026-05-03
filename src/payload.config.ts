@@ -31,6 +31,34 @@ if (!payloadSecret) {
   throw new Error('PAYLOAD_SECRET is required.')
 }
 
+/**
+ * Serverless + managed Postgres often requires TLS; some providers use chains that break
+ * strict verification unless `rejectUnauthorized` is false (Supabase pooler, Neon, etc.).
+ */
+function postgresPoolSsl(connectionString: string): { rejectUnauthorized: boolean } | undefined {
+  if (process.env.PG_POOL_SSL === 'off') return undefined
+
+  const s = connectionString.toLowerCase()
+  const hostHints =
+    s.includes('supabase.co') ||
+    s.includes('neon.tech') ||
+    s.includes('.pooler.') ||
+    s.includes('amazonaws.com') ||
+    s.includes('render.com')
+
+  const urlWantsSsl =
+    s.includes('sslmode=require') ||
+    s.includes('sslmode%3drequire') ||
+    s.includes('sslmode=verify-full') ||
+    s.includes('sslmode=verify-ca')
+
+  if (hostHints || urlWantsSsl || process.env.PG_POOL_SSL === 'require') {
+    return { rejectUnauthorized: process.env.PG_SSL_STRICT === 'true' }
+  }
+
+  return undefined
+}
+
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -51,7 +79,7 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: databaseUrl,
-      ssl: databaseUrl.includes('supabase.co') ? { rejectUnauthorized: false } : undefined,
+      ssl: postgresPoolSsl(databaseUrl),
       max: Number(process.env.PG_POOL_MAX || 10),
       idleTimeoutMillis: Number(process.env.PG_IDLE_TIMEOUT_MS || 30_000),
       connectionTimeoutMillis: Number(process.env.PG_CONN_TIMEOUT_MS || 10_000),

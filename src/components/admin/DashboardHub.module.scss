@@ -93,3 +93,23 @@
 .listLink:hover {
   text-decoration: underline;
 }
+
+.warn {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--theme-warning-600, var(--theme-elevation-800));
+}
+
+.code {
+  font-size: 0.875em;
+}
+
+.pre {
+  margin: 0.75rem 0 0;
+  padding: 0.75rem;
+  overflow: auto;
+  font-size: 0.8125rem;
+  border-radius: 6px;
+  background: var(--theme-elevation-100);
+}

@@ -15,24 +15,25 @@ function startOfWeek(d: Date): Date {
 }
 
 export async function DashboardHub() {
-  const payloadConfig = await configPromise
-  const payload = await getPayload({ config: payloadConfig })
+  try {
+    const payloadConfig = await configPromise
+    const payload = await getPayload({ config: payloadConfig })
 
-  const [{ totalDocs: productCount }, { totalDocs: leadsThisWeek }, recentLeads] = await Promise.all([
-    payload.count({ collection: 'products' }),
-    payload.count({
-      collection: 'leads',
-      where: { createdAt: { greater_than_equal: startOfWeek(new Date()).toISOString() } },
-    }),
-    payload.find({
-      collection: 'leads',
-      sort: '-createdAt',
-      limit: 5,
-      depth: 1,
-    }),
-  ])
+    const [{ totalDocs: productCount }, { totalDocs: leadsThisWeek }, recentLeads] = await Promise.all([
+      payload.count({ collection: 'products' }),
+      payload.count({
+        collection: 'leads',
+        where: { createdAt: { greater_than_equal: startOfWeek(new Date()).toISOString() } },
+      }),
+      payload.find({
+        collection: 'leads',
+        sort: '-createdAt',
+        limit: 5,
+        depth: 1,
+      }),
+    ])
 
-  return (
+    return (
     <div className={styles.wrap}>
       <h2 className={styles.title}>Overview</h2>
       <div className={styles.stats}>
@@ -80,5 +81,22 @@ export async function DashboardHub() {
         )}
       </div>
     </div>
-  )
+    )
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[DashboardHub]', message)
+
+    return (
+      <div className={styles.wrap}>
+        <h2 className={styles.title}>Overview</h2>
+        <p className={styles.warn}>
+          Dashboard stats could not be loaded (often a database connection or env issue on the server).
+          Collections below should still work once the API can reach Postgres — check Vercel → your deployment →
+          Logs, and confirm <code className={styles.code}>DATABASE_URL</code> uses your host&apos;s{' '}
+          <strong>pooler</strong> connection string where recommended (e.g. Supabase).
+        </p>
+        {process.env.NODE_ENV === 'development' ? <pre className={styles.pre}>{message}</pre> : null}
+      </div>
+    )
+  }
 }
