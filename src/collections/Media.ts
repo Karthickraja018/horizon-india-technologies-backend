@@ -17,18 +17,20 @@ async function readUploadBuffer(file: NonNullable<PayloadRequest['file']>): Prom
   const extended = file as NonNullable<PayloadRequest['file']> & { data?: Buffer; buffer?: Buffer }
   if (extended.data && Buffer.isBuffer(extended.data)) return extended.data
   if (extended.buffer && Buffer.isBuffer(extended.buffer)) return extended.buffer
-  if (typeof file.arrayBuffer === 'function') {
-    const ab = await file.arrayBuffer()
+  const asBlob = file as unknown as Blob
+  if (typeof asBlob.arrayBuffer === 'function') {
+    const ab = await asBlob.arrayBuffer()
     return Buffer.from(ab)
   }
   throw new Error('Unable to read uploaded file.')
 }
 
-const validateUploadFile: CollectionBeforeValidateHook = async ({ req, operation }) => {
+const validateUploadFile: CollectionBeforeValidateHook = async ({ req }) => {
   const file = req.file
-  if (!file || operation === 'delete') return
+  if (!file) return
 
-  const mime = file.type || (file as { mimetype?: string }).mimetype || ''
+  const uploadLike = file as unknown as { type?: string; mimetype?: string }
+  const mime = uploadLike.type || uploadLike.mimetype || ''
   const buffer = await readUploadBuffer(file).catch(() => null)
   const size = buffer?.length ?? (Number((file as { size?: number }).size) || 0)
 
@@ -55,8 +57,9 @@ const uploadToCloudinary: CollectionBeforeChangeHook = async ({ data, req, opera
     return data
   }
 
-  const mime = file.type || (file as { mimetype?: string }).mimetype || ''
-  const originalName = file.name || 'upload'
+  const uploadLike = file as unknown as { type?: string; mimetype?: string }
+  const mime = uploadLike.type || uploadLike.mimetype || ''
+  const originalName = (file as { name?: string }).name || 'upload'
   const buffer = await readUploadBuffer(file)
 
   if (ALLOWED_IMAGE_MIME.has(mime)) {
@@ -107,14 +110,13 @@ export const Media: CollectionConfig = {
   upload: {
     disableLocalStorage: true,
     mimeTypes: [...ALLOWED_IMAGE_MIME, ALLOWED_PDF_MIME],
-    maxFileSize: MAX_PDF_BYTES,
   },
   fields: [
     {
       name: 'alt',
       type: 'text',
-      validate: (val, { data }) => {
-        const mimeType = (data as { mimeType?: string })?.mimeType
+      validate: (val: string | null | undefined, { data }: { data?: Record<string, unknown> }) => {
+        const mimeType = typeof data?.mimeType === 'string' ? data.mimeType : undefined
         if (mimeType?.startsWith('image/') && !val) return 'Alt text is required for images.'
         return true
       },

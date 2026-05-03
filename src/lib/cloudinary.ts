@@ -2,7 +2,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import dotenv from 'dotenv'
-import cloudinary from 'cloudinary'
+import { v2 as cloudinary } from 'cloudinary'
 
 /** Resolve repo root from this file (`src/lib/` → project root). */
 function getProjectRootDir(): string {
@@ -117,24 +117,22 @@ export function uploadImageBufferToCloudinary(
 
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      (result: { error?: { message?: string }; secure_url?: string; bytes?: number }) => {
-        if (result?.error || !result?.secure_url) {
-          reject(
-            result?.error ?? new Error('Cloudinary image upload failed'),
-          )
-          return
-        }
-        resolve({
-          secure_url: result.secure_url,
-          bytes: typeof result.bytes === 'number' ? result.bytes : buffer.length,
-        })
-      },
       {
         folder: uploadFolder(),
         resource_type: 'image',
         transformation: imageUploadTransformation,
         use_filename: true,
         unique_filename: true,
+      },
+      (err, result) => {
+        if (err || !result?.secure_url) {
+          reject(err ?? new Error('Cloudinary image upload failed'))
+          return
+        }
+        resolve({
+          secure_url: result.secure_url,
+          bytes: typeof result.bytes === 'number' ? result.bytes : buffer.length,
+        })
       },
     )
 
@@ -153,23 +151,21 @@ export function uploadPdfBufferToCloudinary(
 
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      (result: { error?: { message?: string }; secure_url?: string; bytes?: number }) => {
-        if (result?.error || !result?.secure_url) {
-          reject(
-            result?.error ?? new Error('Cloudinary PDF upload failed'),
-          )
+      {
+        folder: uploadFolder(),
+        resource_type: 'raw',
+        use_filename: true,
+        unique_filename: true,
+      },
+      (err, result) => {
+        if (err || !result?.secure_url) {
+          reject(err ?? new Error('Cloudinary PDF upload failed'))
           return
         }
         resolve({
           secure_url: result.secure_url,
           bytes: typeof result.bytes === 'number' ? result.bytes : buffer.length,
         })
-      },
-      {
-        folder: uploadFolder(),
-        resource_type: 'raw',
-        use_filename: true,
-        unique_filename: true,
       },
     )
 
