@@ -5,6 +5,9 @@ import { slugify } from '../lib/slugify'
 
 export const Products: CollectionConfig = {
   slug: 'products',
+  access: {
+    read: () => true,
+  },
   labels: {
     singular: 'Product',
     plural: 'Products',

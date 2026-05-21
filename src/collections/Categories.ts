@@ -5,6 +5,9 @@ import { assertMediaIsImage } from '../lib/mediaGuards'
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
+  access: {
+    read: () => true,
+  },
   labels: {
     singular: 'Category',
     plural: 'Categories',

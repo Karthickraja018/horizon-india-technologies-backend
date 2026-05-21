@@ -4,6 +4,9 @@ import { assertMediaIsPDF } from '../lib/mediaGuards'
 
 export const Resources: CollectionConfig = {
   slug: 'resources',
+  access: {
+    read: () => true,
+  },
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'fileType', 'fileSize', 'updatedAt'],

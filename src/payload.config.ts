@@ -47,6 +47,24 @@ function warnIfSupabaseDirectDbHost(connectionString: string): void {
 
 warnIfSupabaseDirectDbHost(databaseUrl)
 
+/** Transaction pool expects `postgres.<project_ref>` — plain `postgres` yields 28P01 on many setups. */
+function warnIfSupabasePoolerNeedsScopedUser(connectionString: string): void {
+  try {
+    const u = new URL(connectionString.replace(/^postgresql:/i, 'postgres:'))
+    if (!u.hostname.includes('pooler.supabase.com')) return
+    const user = decodeURIComponent(u.username || '')
+    if (user !== 'postgres') return
+
+    console.warn(
+      '[payload] DATABASE_URL hits Supabase pooler with username "postgres". Use the URI from the dashboard: user must be postgres.<PROJECT_REF> (not postgres alone). Otherwise Postgres returns password authentication failed for user "postgres" (28P01).',
+    )
+  } catch {
+    // ignore malformed URI
+  }
+}
+
+warnIfSupabasePoolerNeedsScopedUser(databaseUrl)
+
 /**
  * Serverless + managed Postgres often requires TLS; some providers use chains that break
  * strict verification unless `rejectUnauthorized` is false (Supabase pooler, Neon, etc.).

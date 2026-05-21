@@ -33,9 +33,9 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], channel: 'chromium' },
     },
   ],
-  webServer: {
-    command: 'pnpm dev',
-    reuseExistingServer: true,
-    url: 'http://localhost:3000',
-  },
+  // webServer: {
+  //   command: 'npm run dev',
+  //   reuseExistingServer: true,
+  //   url: 'http://localhost:3000',
+  // },
 })

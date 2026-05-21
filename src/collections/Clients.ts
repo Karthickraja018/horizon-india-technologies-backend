@@ -4,6 +4,9 @@ import { assertMediaIsImage } from '../lib/mediaGuards'
 
 export const Clients: CollectionConfig = {
   slug: 'clients',
+  access: {
+    read: () => true,
+  },
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'sector', 'updatedAt'],
