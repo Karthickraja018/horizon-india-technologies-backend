@@ -71,6 +71,8 @@ export interface Config {
     leads: Lead;
     categories: Category;
     products: Product;
+    productVariants: ProductVariant;
+    accessories: Accessory;
     media: Media;
     services: Service;
     clients: Client;
@@ -87,6 +89,8 @@ export interface Config {
     leads: LeadsSelect<false> | LeadsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
+    productVariants: ProductVariantsSelect<false> | ProductVariantsSelect<true>;
+    accessories: AccessoriesSelect<false> | AccessoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
@@ -204,6 +208,8 @@ export interface Product {
    * Choose which section this product belongs to.
    */
   category: number | Category;
+  brand?: string | null;
+  series?: string | null;
   /**
    * SKU or manufacturer model reference (optional but recommended).
    */
@@ -212,6 +218,7 @@ export interface Product {
    * Generated from the product name. Used in links and APIs.
    */
   slug: string;
+  isFeatured?: boolean | null;
   /**
    * Shown at the top of the product page.
    */
@@ -228,6 +235,10 @@ export interface Product {
         id?: string | null;
       }[]
     | null;
+  /**
+   * A brief summary shown on product cards and at the top of the detail page.
+   */
+  shortDescription?: string | null;
   description?: string | null;
   applications?: string | null;
   /**
@@ -236,6 +247,12 @@ export interface Product {
   keyFeatures?:
     | {
         feature: string;
+        id?: string | null;
+      }[]
+    | null;
+  standardsSupported?:
+    | {
+        standard: string;
         id?: string | null;
       }[]
     | null;
@@ -249,6 +266,8 @@ export interface Product {
         id?: string | null;
       }[]
     | null;
+  variants?: (number | ProductVariant)[] | null;
+  accessories?: (number | Accessory)[] | null;
   pdf?: (number | null) | Media;
   /**
    * Optional. Shown in browser tabs and search results.
@@ -258,6 +277,13 @@ export interface Product {
    * Optional short summary for search snippets.
    */
   metaDescription?: string | null;
+  /**
+   * Comma separated keywords.
+   */
+  metaKeywords?: string | null;
+  ogTitle?: string | null;
+  ogDescription?: string | null;
+  ogImage?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -293,6 +319,7 @@ export interface Category {
  */
 export interface Media {
   id: number;
+  cloudinaryUrl?: string | null;
   /**
    * Required for images (accessibility).
    */
@@ -308,6 +335,48 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "productVariants".
+ */
+export interface ProductVariant {
+  id: number;
+  /**
+   * e.g. RASNE-TS, RASNET-TS
+   */
+  modelName: string;
+  /**
+   * e.g. Digital Rockwell & Rockwell Superficial
+   */
+  type?: string | null;
+  /**
+   * e.g. 60, 100, 150 kgf
+   */
+  majorLoads?: string | null;
+  /**
+   * e.g. 10 kgf
+   */
+  minorLoads?: string | null;
+  /**
+   * e.g. 0.1 Rockwell
+   */
+  resolution?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "accessories".
+ */
+export interface Accessory {
+  id: number;
+  name: string;
+  category: 'standard' | 'optional';
+  description?: string | null;
+  image?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Services shown on your marketing pages.
@@ -410,6 +479,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'products';
         value: number | Product;
+      } | null)
+    | ({
+        relationTo: 'productVariants';
+        value: number | ProductVariant;
+      } | null)
+    | ({
+        relationTo: 'accessories';
+        value: number | Accessory;
       } | null)
     | ({
         relationTo: 'media';
@@ -575,8 +652,11 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface ProductsSelect<T extends boolean = true> {
   name?: T;
   category?: T;
+  brand?: T;
+  series?: T;
   modelCode?: T;
   slug?: T;
+  isFeatured?: T;
   heroImage?: T;
   galleryImages?:
     | T
@@ -584,12 +664,19 @@ export interface ProductsSelect<T extends boolean = true> {
         media?: T;
         id?: T;
       };
+  shortDescription?: T;
   description?: T;
   applications?: T;
   keyFeatures?:
     | T
     | {
         feature?: T;
+        id?: T;
+      };
+  standardsSupported?:
+    | T
+    | {
+        standard?: T;
         id?: T;
       };
   specTable?:
@@ -599,9 +686,40 @@ export interface ProductsSelect<T extends boolean = true> {
         value?: T;
         id?: T;
       };
+  variants?: T;
+  accessories?: T;
   pdf?: T;
   metaTitle?: T;
   metaDescription?: T;
+  metaKeywords?: T;
+  ogTitle?: T;
+  ogDescription?: T;
+  ogImage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "productVariants_select".
+ */
+export interface ProductVariantsSelect<T extends boolean = true> {
+  modelName?: T;
+  type?: T;
+  majorLoads?: T;
+  minorLoads?: T;
+  resolution?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "accessories_select".
+ */
+export interface AccessoriesSelect<T extends boolean = true> {
+  name?: T;
+  category?: T;
+  description?: T;
+  image?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -610,6 +728,7 @@ export interface ProductsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  cloudinaryUrl?: T;
   alt?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -69,6 +69,7 @@ const uploadToCloudinary: CollectionBeforeChangeHook = async ({ data, req, opera
       filename: originalName,
       mimeType: mime,
       filesize: bytes,
+      cloudinaryUrl: secure_url,
       url: secure_url,
     }
   }
@@ -80,11 +81,22 @@ const uploadToCloudinary: CollectionBeforeChangeHook = async ({ data, req, opera
       filename: originalName,
       mimeType: mime,
       filesize: bytes,
+      cloudinaryUrl: secure_url,
       url: secure_url,
     }
   }
 
   throw new Error('Please upload a valid image (JPG, PNG, WebP) or PDF.')
+}
+
+const mapCloudinaryUrl: import('payload').CollectionAfterReadHook = ({ doc }) => {
+  if (doc.cloudinaryUrl) {
+    return {
+      ...doc,
+      url: doc.cloudinaryUrl,
+    }
+  }
+  return doc
 }
 
 export const Media: CollectionConfig = {
@@ -106,12 +118,20 @@ export const Media: CollectionConfig = {
   hooks: {
     beforeValidate: [validateUploadFile],
     beforeChange: [uploadToCloudinary],
+    afterRead: [mapCloudinaryUrl],
   },
   upload: {
     disableLocalStorage: true,
     mimeTypes: [...ALLOWED_IMAGE_MIME, ALLOWED_PDF_MIME],
   },
   fields: [
+    {
+      name: 'cloudinaryUrl',
+      type: 'text',
+      admin: {
+        hidden: true,
+      },
+    },
     {
       name: 'alt',
       type: 'text',

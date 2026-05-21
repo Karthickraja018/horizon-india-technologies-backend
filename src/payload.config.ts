@@ -12,6 +12,8 @@ import { Media } from './collections/Media'
 import { Categories } from './collections/Categories'
 import { Products } from './collections/Products'
 import { Services } from './collections/Services'
+import { ProductVariants } from './collections/ProductVariants'
+import { Accessories } from './collections/Accessories'
 import { Clients } from './collections/Clients'
 import { Resources } from './collections/Resources'
 import { Leads } from './collections/Leads'
@@ -103,7 +105,7 @@ export default buildConfig({
       beforeDashboard: ['@/components/admin/DashboardHub#DashboardHub'],
     },
   },
-  collections: [Users, Leads, Categories, Products, Media, Services, Clients, Resources],
+  collections: [Users, Leads, Categories, Products, ProductVariants, Accessories, Media, Services, Clients, Resources],
   globals: [SiteSettings],
   editor: lexicalEditor(),
   secret: payloadSecret,

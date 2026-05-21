@@ -44,6 +44,16 @@ export const Products: CollectionConfig = {
           },
         },
         {
+          name: 'brand',
+          type: 'text',
+          label: 'Product Brand',
+        },
+        {
+          name: 'series',
+          type: 'text',
+          label: 'Series',
+        },
+        {
           name: 'modelCode',
           type: 'text',
           label: 'Model code',
@@ -63,6 +73,14 @@ export const Products: CollectionConfig = {
             readOnly: true,
             position: 'sidebar',
             description: 'Generated from the product name. Used in links and APIs.',
+          },
+        },
+        {
+          name: 'isFeatured',
+          type: 'checkbox',
+          label: 'Featured Product',
+          admin: {
+            position: 'sidebar',
           },
         },
       ],
@@ -116,6 +134,14 @@ export const Products: CollectionConfig = {
       label: 'Description',
       fields: [
         {
+          name: 'shortDescription',
+          type: 'textarea',
+          label: 'Short Description',
+          admin: {
+            description: 'A brief summary shown on product cards and at the top of the detail page.',
+          },
+        },
+        {
           name: 'description',
           type: 'textarea',
           label: 'Description',
@@ -149,6 +175,12 @@ export const Products: CollectionConfig = {
           },
           fields: [{ name: 'feature', type: 'text', required: true, label: 'Feature' }],
         },
+        {
+          name: 'standardsSupported',
+          type: 'array',
+          label: 'Standards Supported',
+          fields: [{ name: 'standard', type: 'text', required: true, label: 'Standard (e.g. ASTM E-18)' }],
+        },
       ],
     },
     {
@@ -181,6 +213,26 @@ export const Products: CollectionConfig = {
               label: 'Value',
             },
           ],
+        },
+      ],
+    },
+    {
+      type: 'collapsible',
+      label: 'Variants & Accessories',
+      fields: [
+        {
+          name: 'variants',
+          type: 'relationship',
+          relationTo: 'productVariants',
+          hasMany: true,
+          label: 'Product Variants',
+        },
+        {
+          name: 'accessories',
+          type: 'relationship',
+          relationTo: 'accessories',
+          hasMany: true,
+          label: 'Accessories',
         },
       ],
     },
@@ -224,6 +276,31 @@ export const Products: CollectionConfig = {
           admin: {
             description: 'Optional short summary for search snippets.',
           },
+        },
+        {
+          name: 'metaKeywords',
+          type: 'text',
+          label: 'Meta Keywords',
+          admin: {
+            description: 'Comma separated keywords.',
+          },
+        },
+        {
+          name: 'ogTitle',
+          type: 'text',
+          label: 'Open Graph Title',
+        },
+        {
+          name: 'ogDescription',
+          type: 'textarea',
+          label: 'Open Graph Description',
+        },
+        {
+          name: 'ogImage',
+          type: 'relationship',
+          relationTo: 'media',
+          label: 'Open Graph Image',
+          filterOptions: { mimeType: { contains: 'image/' } },
         },
       ],
     },
