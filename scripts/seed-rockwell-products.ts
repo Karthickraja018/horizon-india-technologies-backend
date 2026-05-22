@@ -79,11 +79,21 @@ async function findOrCreateVariant(
   return created.id as number
 }
 
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '')
+}
+
 async function createProduct(
   payload: Awaited<ReturnType<typeof getPayload>>,
   data: Record<string, unknown>,
 ): Promise<void> {
-  const slug = data.slug as string
+  const slug = slugify(data.name as string)
+  data.slug = slug
   const existing = await payload.find({
     collection: 'products',
     where: { slug: { equals: slug } },
