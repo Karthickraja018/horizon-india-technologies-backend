@@ -56,5 +56,28 @@ export const ProductVariants: CollectionConfig = {
         description: 'e.g. 0.1 Rockwell',
       },
     },
+    {
+      name: 'specTable',
+      type: 'array',
+      label: 'Variant-specific specifications',
+      labels: { singular: 'Row', plural: 'Specification rows' },
+      admin: {
+        description: 'Technical specs unique to this variant (e.g. Max Height, Weight, Throat Depth).',
+      },
+      fields: [
+        {
+          name: 'label',
+          type: 'text',
+          required: true,
+          label: 'Specification',
+        },
+        {
+          name: 'value',
+          type: 'text',
+          required: true,
+          label: 'Value',
+        },
+      ],
+    },
   ],
 }

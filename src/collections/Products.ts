@@ -14,7 +14,7 @@ export const Products: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'category', 'modelCode', 'updatedAt'],
+    defaultColumns: ['name', 'modelCode', 'category', 'isFeatured', 'updatedAt'],
     group: 'Catalog',
     description:
       'Your B2B catalog items shown on the website. To copy an existing product quickly, open it and use the Duplicate action (⋯ menu).',
@@ -78,9 +78,12 @@ export const Products: CollectionConfig = {
         {
           name: 'isFeatured',
           type: 'checkbox',
-          label: 'Featured Product',
+          label: '⭐ Featured on Homepage',
+          defaultValue: false,
           admin: {
             position: 'sidebar',
+            description:
+              'Tick to show this product in the Featured Products carousel on the home page. Up to 6 featured products are displayed.',
           },
         },
       ],

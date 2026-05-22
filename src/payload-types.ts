@@ -218,6 +218,9 @@ export interface Product {
    * Generated from the product name. Used in links and APIs.
    */
   slug: string;
+  /**
+   * Tick to show this product in the Featured Products carousel on the home page. Up to 6 featured products are displayed.
+   */
   isFeatured?: boolean | null;
   /**
    * Shown at the top of the product page.
@@ -362,6 +365,16 @@ export interface ProductVariant {
    * e.g. 0.1 Rockwell
    */
   resolution?: string | null;
+  /**
+   * Technical specs unique to this variant (e.g. Max Height, Weight, Throat Depth).
+   */
+  specTable?:
+    | {
+        label: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -708,6 +721,13 @@ export interface ProductVariantsSelect<T extends boolean = true> {
   majorLoads?: T;
   minorLoads?: T;
   resolution?: T;
+  specTable?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
