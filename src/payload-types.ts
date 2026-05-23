@@ -270,6 +270,7 @@ export interface Product {
       }[]
     | null;
   variants?: (number | ProductVariant)[] | null;
+  variantSelectorType?: ('dropdown' | 'tabs') | null;
   accessories?: (number | Accessory)[] | null;
   pdf?: (number | null) | Media;
   /**
@@ -375,6 +376,30 @@ export interface ProductVariant {
         id?: string | null;
       }[]
     | null;
+  parentFamily?: (number | null) | Product;
+  shortDescription?: string | null;
+  features?:
+    | {
+        feature: string;
+        id?: string | null;
+      }[]
+    | null;
+  standards?:
+    | {
+        standard: string;
+        id?: string | null;
+      }[]
+    | null;
+  accessories?: (number | Accessory)[] | null;
+  images?:
+    | {
+        media: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  downloadablePDF?: (number | null) | Media;
+  featuredVariant?: boolean | null;
+  displayOrder?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -700,6 +725,7 @@ export interface ProductsSelect<T extends boolean = true> {
         id?: T;
       };
   variants?: T;
+  variantSelectorType?: T;
   accessories?: T;
   pdf?: T;
   metaTitle?: T;
@@ -728,6 +754,30 @@ export interface ProductVariantsSelect<T extends boolean = true> {
         value?: T;
         id?: T;
       };
+  parentFamily?: T;
+  shortDescription?: T;
+  features?:
+    | T
+    | {
+        feature?: T;
+        id?: T;
+      };
+  standards?:
+    | T
+    | {
+        standard?: T;
+        id?: T;
+      };
+  accessories?: T;
+  images?:
+    | T
+    | {
+        media?: T;
+        id?: T;
+      };
+  downloadablePDF?: T;
+  featuredVariant?: T;
+  displayOrder?: T;
   updatedAt?: T;
   createdAt?: T;
 }

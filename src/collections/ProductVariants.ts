@@ -79,5 +79,77 @@ export const ProductVariants: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'parentFamily',
+      type: 'relationship',
+      relationTo: 'products',
+      label: 'Parent Product Family',
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'shortDescription',
+      type: 'textarea',
+      label: 'Short Description',
+    },
+    {
+      name: 'features',
+      type: 'array',
+      label: 'Variant Features',
+      fields: [{ name: 'feature', type: 'text', required: true, label: 'Feature' }],
+    },
+    {
+      name: 'standards',
+      type: 'array',
+      label: 'Supported Standards',
+      fields: [{ name: 'standard', type: 'text', required: true, label: 'Standard' }],
+    },
+    {
+      name: 'accessories',
+      type: 'relationship',
+      relationTo: 'accessories',
+      hasMany: true,
+      label: 'Accessories',
+    },
+    {
+      name: 'images',
+      type: 'array',
+      labels: { singular: 'Image', plural: 'Images' },
+      fields: [
+        {
+          name: 'media',
+          type: 'relationship',
+          relationTo: 'media',
+          required: true,
+          label: 'Image',
+          filterOptions: { mimeType: { contains: 'image/' } },
+        },
+      ],
+    },
+    {
+      name: 'downloadablePDF',
+      type: 'relationship',
+      relationTo: 'media',
+      label: 'Downloadable spec sheet (PDF)',
+      filterOptions: { mimeType: { equals: 'application/pdf' } },
+    },
+    {
+      name: 'featuredVariant',
+      type: 'checkbox',
+      label: 'Is Featured Variant?',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'displayOrder',
+      type: 'number',
+      label: 'Display Order',
+      admin: {
+        position: 'sidebar',
+      },
+    },
   ],
 }

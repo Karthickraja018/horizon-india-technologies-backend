@@ -9,8 +9,8 @@ export const Products: CollectionConfig = {
     read: () => true,
   },
   labels: {
-    singular: 'Product',
-    plural: 'Products',
+    singular: 'Product Family',
+    plural: 'Product Families',
   },
   admin: {
     useAsTitle: 'name',
@@ -229,6 +229,16 @@ export const Products: CollectionConfig = {
           relationTo: 'productVariants',
           hasMany: true,
           label: 'Product Variants',
+        },
+        {
+          name: 'variantSelectorType',
+          type: 'select',
+          label: 'Variant Selector Style',
+          defaultValue: 'dropdown',
+          options: [
+            { label: 'Dropdown', value: 'dropdown' },
+            { label: 'Tabs', value: 'tabs' },
+          ],
         },
         {
           name: 'accessories',
