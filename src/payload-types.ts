@@ -312,6 +312,15 @@ export interface Category {
    * Please upload a valid image file (JPG, PNG, WebP).
    */
   heroImage?: (number | null) | Media;
+  /**
+   * Lucide icon name (e.g. Gauge, Microscope, etc.)
+   */
+  icon?: string | null;
+  status?: ('active' | 'draft') | null;
+  featured?: boolean | null;
+  sortOrder?: number | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -680,6 +689,12 @@ export interface CategoriesSelect<T extends boolean = true> {
   slug?: T;
   description?: T;
   heroImage?: T;
+  icon?: T;
+  status?: T;
+  featured?: T;
+  sortOrder?: T;
+  seoTitle?: T;
+  seoDescription?: T;
   updatedAt?: T;
   createdAt?: T;
 }

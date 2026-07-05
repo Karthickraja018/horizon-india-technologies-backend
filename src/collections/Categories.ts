@@ -61,6 +61,57 @@ export const Categories: CollectionConfig = {
         mimeType: { contains: 'image/' },
       },
     },
+    {
+      name: 'icon',
+      type: 'text',
+      label: 'Icon Name',
+      admin: {
+        description: 'Lucide icon name (e.g. Gauge, Microscope, etc.)',
+      },
+    },
+    {
+      name: 'status',
+      type: 'select',
+      defaultValue: 'active',
+      options: [
+        { label: 'Active', value: 'active' },
+        { label: 'Draft', value: 'draft' },
+      ],
+      label: 'Status',
+    },
+    {
+      name: 'featured',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Featured Category',
+    },
+    {
+      name: 'sortOrder',
+      type: 'number',
+      label: 'Sort Order',
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      type: 'collapsible',
+      label: 'SEO',
+      admin: {
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          name: 'seoTitle',
+          type: 'text',
+          label: 'SEO Title',
+        },
+        {
+          name: 'seoDescription',
+          type: 'textarea',
+          label: 'SEO Description',
+        },
+      ],
+    },
   ],
   hooks: {
     beforeValidate: [

@@ -1,6 +1,7 @@
 import 'dotenv/config'
 
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -95,7 +96,24 @@ function postgresPoolSsl(connectionString: string): { rejectUnauthorized: boolea
   return undefined
 }
 
+const smtpHost = process.env.SMTP_HOST
+
 export default buildConfig({
+  email: smtpHost
+    ? nodemailerAdapter({
+        defaultFromAddress: process.env.SMTP_FROM_EMAIL || 'no-reply@horizonindiatechnologies.com',
+        defaultFromName: 'Horizon India Technologies',
+        transportOptions: {
+          host: smtpHost,
+          port: Number(process.env.SMTP_PORT || 587),
+          secure: process.env.SMTP_SECURE === 'true',
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+          },
+        },
+      })
+    : undefined,
   admin: {
     user: Users.slug,
     importMap: {

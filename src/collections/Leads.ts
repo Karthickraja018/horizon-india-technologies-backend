@@ -18,6 +18,34 @@ export const Leads: CollectionConfig = {
       beforeListTable: ['@/components/admin/LeadsQuickFilters#LeadsQuickFilters'],
     },
   },
+  hooks: {
+    afterChange: [
+      async ({ doc, operation, req }) => {
+        if (operation !== 'create') return
+        const notifyTo = process.env.LEAD_NOTIFICATION_EMAIL
+        if (!notifyTo) return
+
+        try {
+          await req.payload.sendEmail({
+            to: notifyTo,
+            subject: `New enquiry from ${doc.name}${doc.company ? ` (${doc.company})` : ''}`,
+            html: `
+              <h2>New website enquiry</h2>
+              <p><strong>Name:</strong> ${doc.name}</p>
+              <p><strong>Company:</strong> ${doc.company || '—'}</p>
+              <p><strong>Phone:</strong> ${doc.phone}</p>
+              <p><strong>Email:</strong> ${doc.email}</p>
+              <p><strong>Message:</strong></p>
+              <pre style="white-space: pre-wrap; font-family: inherit;">${doc.message || '—'}</pre>
+              <p>View and manage this lead in the admin panel.</p>
+            `,
+          })
+        } catch (err) {
+          req.payload.logger.error(`Failed to send lead notification email: ${err}`)
+        }
+      },
+    ],
+  },
   access: {
     create: () => true,
     read: adminsOnly,
